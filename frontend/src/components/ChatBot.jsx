@@ -66,7 +66,7 @@ function ChatBot(props) {
       SetDataChat((prev) => [...prev, ["end", [promptInput]]]);
       SetChatHistory((prev) => [promptInput, ...prev]);
 
-      fetch("http://localhost:8000/chat", {
+      fetch("http://213.181.122.2:43535/chat", {
         method: "post",
         headers: {
           "Content-Type": "application/json",
