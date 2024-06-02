@@ -78,6 +78,7 @@ function ChatBot(props) {
           SetDataChat((prev) => [
             ...prev,
             ["start", [result.response]],
+            ["start", ["Các tài liệu liên quan:", result.retriever.join("\n")]],
           ]);
           SetIsLoad(false);
         })
@@ -154,6 +155,9 @@ function ChatBot(props) {
                     cursor={false}
                     speed={100}
                   />
+                  {dataMessages[1][1] && (
+                    <div className="text-xs mt-2 text-gray-200">{dataMessages[1][1]}</div>
+                  )}
                 </div>
               </div>
             ) : (
