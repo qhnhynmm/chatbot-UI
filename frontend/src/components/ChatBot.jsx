@@ -103,7 +103,7 @@ function ChatBot(props) {
       [
         "start",
         [
-          "Xin chào! Đây là NTTU Chatbot, trợ lý đắc lực dành cho bạn! Bạn muốn tìm kiếm thông tin về những gì? Đừng quên chọn nguồn tham khảo phù hợp để mình có thể giúp bạn tìm kiếm thông tin chính xác nhất nha. 😄",
+        "Lúc bạn tìm đến tôi thì chắc bạn cũng đã phạm một lỗi lầm nào đó có thể đi tù. Hãy để tôi an ủi tâm hồn của bạn bằng thông tin những bản án bạn có thể nhận. 😄",
           null,
         ],
       ],
