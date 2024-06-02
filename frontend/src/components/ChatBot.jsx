@@ -4,6 +4,7 @@ import ScaleLoader from "react-spinners/ScaleLoader";
 import { TypeAnimation } from "react-type-animation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMessage, faTrashAlt } from "@fortawesome/free-regular-svg-icons";
+import axios from "axios";
 
 function ChatBot(props) {
   const messagesEndRef = useRef(null);
@@ -40,7 +41,7 @@ function ChatBot(props) {
 
   useEffect(() => {
     ScrollToEndChat();
-  }, [isLoading]);
+  }, [isLoading, dataChat]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -66,29 +67,28 @@ function ChatBot(props) {
       SetDataChat((prev) => [...prev, ["end", [promptInput]]]);
       SetChatHistory((prev) => [promptInput, ...prev]);
 
-      fetch("http://213.181.122.2:43535/chat", {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: promptInput }),
-      })
-        .then((response) => response.json())
-        .then((result) => {
-          SetDataChat((prev) => [
-            ...prev,
-            ["start", [result.response]],
-            ["start", ["Các tài liệu liên quan:", result.retriever.join("\n")]],
-          ]);
-          SetIsLoad(false);
-        })
-        .catch((error) => {
-          SetDataChat((prev) => [
-            ...prev,
-            ["start", ["Lỗi, không thể kết nối với server"]],
-          ]);
-          SetIsLoad(false);
+      try {
+        const response = await axios.post("https://213.181.123.66:22835/chat", {
+          message: promptInput,
+        }, {
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
+
+        SetDataChat((prev) => [
+          ...prev,
+          ["start", [response.data.response]],
+          ["start", ["Các tài liệu liên quan:", response.data.retriever.join("\n")]],
+        ]);
+      } catch (error) {
+        SetDataChat((prev) => [
+          ...prev,
+          ["start", ["Lỗi, không thể kết nối với server"]],
+        ]);
+      } finally {
+        SetIsLoad(false);
+      }
     }
   }
 
@@ -103,7 +103,7 @@ function ChatBot(props) {
       [
         "start",
         [
-        "Lúc bạn tìm đến tôi thì chắc bạn cũng đã phạm một lỗi lầm nào đó có thể đi tù. Hãy để tôi an ủi tâm hồn của bạn bằng thông tin những bản án bạn có thể nhận. 😄",
+          "Lúc bạn tìm đến tôi thì chắc bạn cũng đã phạm một lỗi lầm nào đó có thể đi tù. Hãy để tôi an ủi tâm hồn của bạn bằng thông tin những bản án bạn có thể nhận. 😄",
           null,
         ],
       ],
@@ -161,7 +161,7 @@ function ChatBot(props) {
                 </div>
               </div>
             ) : (
-              <div className="chat chat-end">
+              <div className="chat chat-end" key={i}>
                 <div className="chat-bubble shadow-xl chat-bubble-primary bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white">
                   {dataMessages[1][0]}
                 </div>
