@@ -13,10 +13,8 @@ from typing import List
 GENERATE_MODEL_NAME="Viet-Mistral/Vistral-7B-Chat"
 EMBEDDINGS_MODEL_NAME="minhquan6203/paraphrase-vietnamese-law"
 QDRANT_COLLECTION_NAME = "luatvn"
-HUGGINGFACE_API_KEY = "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"
 QDRANT_API_KEY = "dUJgYp7EhoOPkvfuCgNISVNepSJmcsyYuChWaPWKp3cI5IKlH1jASQ"
 QDRANT_URL = "https://e97858d2-f855-42e6-a6d0-ed7e232db5ea.us-east4-0.gcp.cloud.qdrant.io:6333"
-HUGGINGFACE_API_KEY= "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"
 class RerankRetriever(VectorStoreRetriever):
     vectorstore: VectorStoreRetriever
     def get_relevant_documents(self, query: str) -> List[Document]:
