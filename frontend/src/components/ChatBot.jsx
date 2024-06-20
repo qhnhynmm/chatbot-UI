@@ -8,28 +8,12 @@ import axios from "axios";
 
 function ChatBot(props) {
   const messagesEndRef = useRef(null);
-  const [timeOfRequest, SetTimeOfRequest] = useState(0);
-  let [promptInput, SetPromptInput] = useState("");
-  let [chatHistory, SetChatHistory] = useState([]);
-
-  const commonQuestions = [
-    "Điều kiện nhận học bổng?",
-    "Bao nhiêu điểm thì học lực Xuất sắc?",
-    "Bao nhiêu điểm thì học lực Giỏi?",
-    "Bao nhiêu điểm thì học lực Khá?",
-    "Điều kiện thực tập tốt nghiệp là gì?",
-    "Học phần đã đăng ký có trạng thái N* là gì?",
-    "Điều kiện nào để được xét chuyển trường?",
-    "Lệ phí cấp bảng điểm là bao nhiêu?",
-    "Nếu điểm thi kết thúc học phần < 4 thì như thế nào?",
-    "Phí cấp lại thẻ sinh viên khi bị mất là bao nhiêu?",
-    "Để đạt loại tốt điểm rèn luyện cần bao nhiêu điểm?",
-    "Nếu sinh viên không đạt ở một học phần, phải làm gì?",
-  ];
-
-  let [isLoading, SetIsLoad] = useState(false);
-  let [isGen, SetIsGen] = useState(false);
-  const [dataChat, SetDataChat] = useState([
+  const [timeOfRequest, setTimeOfRequest] = useState(0);
+  const [promptInput, setPromptInput] = useState("");
+  const [chatHistory, setChatHistory] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGen, setIsGen] = useState(false);
+  const [dataChat, setDataChat] = useState([
     [
       "start",
       [
@@ -41,56 +25,54 @@ function ChatBot(props) {
 
   useEffect(() => {
     ScrollToEndChat();
-  }, [isLoading, dataChat]);
+  }, [dataChat]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      SetTimeOfRequest((timeOfRequest) => timeOfRequest + 1);
+      setTimeOfRequest((prevTime) => prevTime + 1);
     }, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  function ScrollToEndChat() {
+  const ScrollToEndChat = () => {
     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-  }
-
-  const onChangeHandler = (event) => {
-    SetPromptInput(event.target.value);
   };
 
-  async function SendMessageChat() {
-    if (promptInput !== "" && isLoading === false) {
-      SetTimeOfRequest(0);
-      SetIsGen(true);
-      SetPromptInput("");
-      SetIsLoad(true);
-      SetDataChat((prev) => [...prev, ["end", [promptInput]]]);
-      SetChatHistory((prev) => [promptInput, ...prev]);
+  const onChangeHandler = (event) => {
+    setPromptInput(event.target.value);
+  };
+
+  const SendMessageChat = async () => {
+    if (promptInput && !isLoading) {
+      setTimeOfRequest(0);
+      setIsGen(true);
+      setPromptInput("");
+      setIsLoading(true);
+      setDataChat((prev) => [...prev, ["end", [promptInput]]]);
+      setChatHistory((prev) => [promptInput, ...prev]);
 
       try {
-        const response = await axios.post("https://213.181.123.66:22835/chat", {
-          message: promptInput,
-        }, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axios.post(
+          "http://38.80.122.119:49594/chat",
+          { message: promptInput },
+          { headers: { "Content-Type": "application/json" } }
+        );
 
-        SetDataChat((prev) => [
+        setDataChat((prev) => [
           ...prev,
           ["start", [response.data.response]],
           ["start", ["Các tài liệu liên quan:", response.data.retriever.join("\n")]],
         ]);
       } catch (error) {
-        SetDataChat((prev) => [
+        setDataChat((prev) => [
           ...prev,
           ["start", ["Lỗi, không thể kết nối với server"]],
         ]);
       } finally {
-        SetIsLoad(false);
+        setIsLoading(false);
       }
     }
-  }
+  };
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -99,7 +81,7 @@ function ChatBot(props) {
   };
 
   const clearChat = () => {
-    SetDataChat([
+    setDataChat([
       [
         "start",
         [
@@ -115,28 +97,28 @@ function ChatBot(props) {
       <div className="hidden lg:block drawer-side absolute w-64 h-[20vh] left-3 mt-2 drop-shadow-md">
         <div className="menu p-4 w-full min-h-full bg-gray-800 text-white rounded-2xl mt-3 overflow-auto scroll-y-auto max-h-[80vh]">
           <ul className="menu text-sm">
-            <h2 className="font-bold mb-2 text-white">
-              Lịch sử trò chuyện
-            </h2>
+            <h2 className="font-bold mb-2 text-white">Lịch sử trò chuyện</h2>
             {chatHistory.length === 0 ? (
               <p className="text-sm text-gray-500">Hiện chưa có cuộc hội thoại nào</p>
             ) : (
-              ""
+              chatHistory.map((mess, i) => (
+                <li key={i}>
+                  <p>
+                    <FontAwesomeIcon icon={faMessage} />
+                    {mess.length < 20 ? mess : mess.slice(0, 20) + "..."}
+                  </p>
+                </li>
+              ))
             )}
-            {chatHistory.map((mess, i) => (
-              <li key={i}>
-                <p>
-                  <FontAwesomeIcon icon={faMessage} />
-                  {mess.length < 20 ? mess : mess.slice(0, 20) + "..."}
-                </p>
-              </li>
-            ))}
           </ul>
         </div>
       </div>
 
       <div className="flex justify-center h-[80vh]">
-        <div id="chat-area" className="mt-5 text-sm scrollbar-thin scrollbar-thumb-gray-500 bg-gray-900 scrollbar-thumb-rounded-full scrollbar-track-rounded-full rounded-3xl border-2 md:w-[60%] md:p-3 p-1 w-full overflow-auto scroll-y-auto h-[75%]">
+        <div
+          id="chat-area"
+          className="mt-5 text-sm scrollbar-thin scrollbar-thumb-gray-500 bg-gray-900 scrollbar-thumb-rounded-full scrollbar-track-rounded-full rounded-3xl border-2 md:w-[60%] md:p-3 p-1 w-full overflow-auto scroll-y-auto h-[75%]"
+        >
           {dataChat.map((dataMessages, i) =>
             dataMessages[0] === "start" ? (
               <div className="chat chat-start drop-shadow-md" key={i}>
@@ -150,7 +132,7 @@ function ChatBot(props) {
                     style={{ whiteSpace: "pre-line" }}
                     sequence={[
                       dataMessages[1][0],
-                      () => SetIsGen(false),
+                      () => setIsGen(false),
                     ]}
                     cursor={false}
                     speed={100}
@@ -168,7 +150,7 @@ function ChatBot(props) {
               </div>
             )
           )}
-          {isLoading ? (
+          {isLoading && (
             <div className="chat chat-start">
               <div className="chat-image avatar">
                 <div className="w-10 rounded-full border-2 border-blue-500">
@@ -187,8 +169,6 @@ function ChatBot(props) {
                 <p className="text-xs font-medium">{timeOfRequest + "/60s"}</p>
               </div>
             </div>
-          ) : (
-            ""
           )}
           <div ref={messagesEndRef} />
         </div>
@@ -206,7 +186,7 @@ function ChatBot(props) {
 
           <button
             disabled={isGen}
-            onClick={() => SendMessageChat()}
+            onClick={SendMessageChat}
             className="drop-shadow-md rounded-2xl col-span-1 btn btn-active bg-gradient-to-tl from-transparent via-blue-600 to-indigo-500"
           >
             <svg
@@ -225,7 +205,7 @@ function ChatBot(props) {
           </button>
 
           <button
-            onClick={() => clearChat()}
+            onClick={clearChat}
             className="drop-shadow-md rounded-2xl col-span-1 btn btn-active btn-danger btn-square"
           >
             <FontAwesomeIcon icon={faTrashAlt} color="white" />
